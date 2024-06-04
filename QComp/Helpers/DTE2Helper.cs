@@ -25,15 +25,31 @@ namespace QComp.Helpers
             return new FileInfo(_applicationObject.Solution.FullName).Directory;
         }
 
+        private static async Task<EnvDTE.Project> GetProjectAsync(string name)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            EnvDTE80.DTE2 _dte = GetDTE2();
+
+            var _projects = _dte.ActiveSolutionProjects as Array;
+            if (_projects != null && _projects.Length != 0)
+            {
+                for (int i = 0; i < _projects.Length; i++)
+                    if (_projects.GetValue(i) is EnvDTE.Project proj && proj.FullName.EndsWith(name))
+                        return proj;
+            }
+            return null;
+        }
+
         public static async Task<DirectoryInfo> GetActiveProjectAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             EnvDTE80.DTE2 _dte = GetDTE2();
 
-            Array _projects = _dte.ActiveSolutionProjects as Array;
-            if (_projects.Length != 0 && _projects != null)
+            var _startupProjects = _dte.Solution.SolutionBuild.StartupProjects as Array;
+            if (_startupProjects != null && _startupProjects.Length != 0)
             {
-                var _selectedProject = _projects.GetValue(0) as EnvDTE.Project;
+                var targetProject = _startupProjects.GetValue(0) as string;
+                var _selectedProject = await GetProjectAsync(targetProject);
                 return new FileInfo(_selectedProject.FullName).Directory;
             }
             return null;
@@ -44,10 +60,11 @@ namespace QComp.Helpers
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             EnvDTE80.DTE2 _dte = GetDTE2();
 
-            Array _projects = _dte.ActiveSolutionProjects as Array;
-            if (_projects.Length != 0 && _projects != null)
+            var _startupProjects = _dte.Solution.SolutionBuild.StartupProjects as Array;
+            if (_startupProjects != null && _startupProjects.Length != 0)
             {
-                var _selectedProject = _projects.GetValue(0) as EnvDTE.Project;
+                var targetProject = _startupProjects.GetValue(0) as string;
+                var _selectedProject = await GetProjectAsync(targetProject);
                 var configuration = _selectedProject.ConfigurationManager.ActiveConfiguration.ConfigurationName;
                 foreach (Property prop in _selectedProject.Properties)
                     if (prop.Name == "FriendlyTargetFramework")

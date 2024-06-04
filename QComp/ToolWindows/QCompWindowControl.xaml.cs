@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.Threading;
 using QComp.Helpers;
+using QComp.Models;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -11,55 +12,46 @@ namespace QComp
 {
     public partial class QCompWindowControl : UserControl
     {
-        public static string SaveLocation = "QComp";
-
+        private SavesManager _saveManager;
         private Process? _currentProcess;
         private bool _abort = false;
 
         public QCompWindowControl()
         {
             InitializeComponent();
+            _saveManager = new SavesManager();
         }
 
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            await _saveManager.InitializeAsync();
             await RefreshComboboxAsync();
         }
 
         private async Task RefreshComboboxAsync()
         {
             CompareToCombobox.Items.Clear();
-            var solution = await DTE2Helper.GetSolutionPathAsync();
             var project = await DTE2Helper.GetActiveProjectAsync();
-            if (solution != null && project != null)
-            {
-                var targetSaves = Path.Combine(solution.FullName, ".vs", project.Name, SaveLocation);
-                if (!Directory.Exists(targetSaves))
-                    Directory.CreateDirectory(targetSaves);
-
-                foreach (var folder in new DirectoryInfo(targetSaves).GetDirectories())
-                {
-                    CompareToCombobox.Items.Add($"{folder.Name}");
-                }
-            }
+            if (project != null)
+                foreach(var save in _saveManager.GetSavesForProject(project.Name))
+                    CompareToCombobox.Items.Add(save);
         }
 
         private async void CompareButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CompareToCombobox.Text != "")
+            if (CompareToCombobox.SelectedItem is SaveItem save)
             {
                 _abort = false;
                 RunningGrid.Visibility = Visibility.Visible;
                 ControlsPanel.IsEnabled = false;
                 ControlsPanel.Opacity = 0.3;
                 ResultTextBlock.Text = "";
-                var solution = await DTE2Helper.GetSolutionPathAsync();
                 var project = await DTE2Helper.GetActiveProjectAsync();
+                var targetBinary = _saveManager.GetBinaryPath(project.Name, save.Name);
                 var rounds = Int32.Parse(RoundsTextBox.Text);
-                if (solution != null && project != null)
+                if (project != null && targetBinary != null)
                 {
                     var currentBinary = Path.Combine(project.FullName, await DTE2Helper.GetOutputDirAsync(), $"{project.Name}.exe");
-                    var targetBinary = Path.Combine(solution.FullName, ".vs", project.Name, SaveLocation, CompareToCombobox.Text, $"{project.Name}.exe");
                     RunningProgressBar.Maximum = rounds * 2;
                     RunningProgressBar.Value = 0;
 
@@ -79,7 +71,7 @@ namespace QComp
                     var exitTarget = -1;
                     for (int i = 0; i < rounds && !_abort; i++) 
                     { 
-                        exitTarget = await ExecuteBinaryAsync(targetBinary, ArgumentsTextbox.Text);
+                        exitTarget = await ExecuteBinaryAsync(targetBinary.FullName, ArgumentsTextbox.Text);
                         RunningProgressBar.Value += 1;
                     }
                     watch.Stop();
@@ -125,26 +117,15 @@ namespace QComp
         {
             if (SaveNewNameTextbox.Text != "")
             {
-                await CopyBinariesToCacheAsync(SaveNewNameTextbox.Text);
+                var project = await DTE2Helper.GetActiveProjectAsync();
+                if (project != null)
+                {
+                    var sourceContent = Path.Combine(project.FullName, await DTE2Helper.GetOutputDirAsync());
+                    _saveManager.Save(sourceContent, project.Name, SaveNewNameTextbox.Text);
+                }
                 SaveNewNameTextbox.Text = "";
             }
             await RefreshComboboxAsync();
-        }
-
-        private async Task CopyBinariesToCacheAsync(string name)
-        {
-            var solution = await DTE2Helper.GetSolutionPathAsync();
-            var project = await DTE2Helper.GetActiveProjectAsync();
-            if (solution != null && project != null)
-            {
-                var targetSaves = Path.Combine(solution.FullName, ".vs", project.Name, SaveLocation);
-                var newSaveDir = Path.Combine(targetSaves, name);
-                Directory.CreateDirectory(newSaveDir);
-
-                var sourceBinaries = Path.Combine(project.FullName, await DTE2Helper.GetOutputDirAsync());
-
-                FileHelper.Copy(sourceBinaries, newSaveDir);
-            }
         }
 
         private static readonly Regex _regex = new Regex("[^0-9.-]+");
