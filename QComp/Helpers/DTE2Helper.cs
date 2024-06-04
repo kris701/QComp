@@ -30,16 +30,15 @@ namespace QComp.Helpers
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             EnvDTE80.DTE2 _dte = GetDTE2();
 
-            var _projects = _dte.ActiveSolutionProjects as Array;
-            if (_projects != null && _projects.Length != 0)
+            var _projects = _dte.Solution.Projects;
+            if (_projects != null && _projects.Count != 0)
             {
-                for (int i = 0; i < _projects.Length; i++)
-                    if (_projects.GetValue(i) is EnvDTE.Project proj && proj.FullName.EndsWith(name))
-                        return proj;
+                foreach(EnvDTE.Project project in _projects)
+                    if (project.FullName.EndsWith(name))
+                        return project;
             }
             return null;
         }
-
         public static async Task<DirectoryInfo> GetActiveProjectAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -50,6 +49,8 @@ namespace QComp.Helpers
             {
                 var targetProject = _startupProjects.GetValue(0) as string;
                 var _selectedProject = await GetProjectAsync(targetProject);
+                if (_selectedProject == null)
+                    return null;
                 return new FileInfo(_selectedProject.FullName).Directory;
             }
             return null;
@@ -65,6 +66,8 @@ namespace QComp.Helpers
             {
                 var targetProject = _startupProjects.GetValue(0) as string;
                 var _selectedProject = await GetProjectAsync(targetProject);
+                if (_selectedProject == null)
+                    return null;
                 var configuration = _selectedProject.ConfigurationManager.ActiveConfiguration.ConfigurationName;
                 foreach (Property prop in _selectedProject.Properties)
                     if (prop.Name == "FriendlyTargetFramework")

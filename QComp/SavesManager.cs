@@ -50,6 +50,8 @@ namespace QComp
             if (_index.Items[project].Any(x => x.Name == name))
                 return;
             var newSaveDir = Path.Combine(_qCompSaveDir, project, name);
+            if (!File.Exists(Path.Combine(sourceContent, $"{project}.exe")))
+                return;
             FileHelper.Copy(sourceContent, newSaveDir);
             _index.Items[project].Add(new SaveItem(name, $"{project}.exe", DateTime.Now));
             File.WriteAllText(_indexFileName, JsonSerializer.Serialize(_index));
@@ -61,10 +63,18 @@ namespace QComp
                 _index.Items.Add(project, new List<SaveItem>());
             if (!_index.Items[project].Any(x => x.Name == name))
                 return;
-            var newSaveDir = Path.Combine(_qCompSaveDir, name);
+            var newSaveDir = Path.Combine(_qCompSaveDir, project, name);
             Directory.Delete(newSaveDir, true);
             _index.Items[project].RemoveAll(x => x.Name == name);
             File.WriteAllText(_indexFileName, JsonSerializer.Serialize(_index));
+        }
+
+        public void DeleteAll(string project)
+        {
+            if (!_index.Items.ContainsKey(project))
+                _index.Items.Add(project, new List<SaveItem>());
+            foreach (var save in _index.Items[project])
+                Delete(project, save.Name);
         }
 
         public List<SaveItem> GetSavesForProject(string project)

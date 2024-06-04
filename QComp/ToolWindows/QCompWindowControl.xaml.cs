@@ -1,25 +1,31 @@
 ﻿using Microsoft.VisualStudio.Threading;
 using QComp.Helpers;
 using QComp.Models;
+using QComp.UserControls;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
 
 namespace QComp
 {
     public partial class QCompWindowControl : UserControl
     {
         private SavesManager _saveManager;
-        private Process? _currentProcess;
+        private ComparisonManager _comparisoManager;
         private bool _abort = false;
 
         public QCompWindowControl()
         {
             InitializeComponent();
             _saveManager = new SavesManager();
+            _comparisoManager = new ComparisonManager();
+            _comparisoManager.OnRoundStarted += () => { RunningProgressBar.Value += 1; };
         }
 
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -28,89 +34,76 @@ namespace QComp
             await RefreshComboboxAsync();
         }
 
+        private async Task DeleteItemAsync(SaveItem save)
+        {
+            var project = await DTE2Helper.GetActiveProjectAsync();
+            if (project != null)
+            {
+                _saveManager.Delete(project.Name, save.Name);
+                foreach (var item in CompareToCombobox.Items) 
+                {
+                    if (item is ComboboxItemWithDelete actItem && actItem.Save == save)
+                    {
+                        CompareToCombobox.Items.Remove(item);
+                        break;
+                    }
+                }        
+            }
+        }
+
         private async Task RefreshComboboxAsync()
         {
             CompareToCombobox.Items.Clear();
             var project = await DTE2Helper.GetActiveProjectAsync();
             if (project != null)
                 foreach(var save in _saveManager.GetSavesForProject(project.Name))
-                    CompareToCombobox.Items.Add(save);
+                    CompareToCombobox.Items.Add(new ComboboxItemWithDelete(save, DeleteItemAsync));
         }
 
         private async void CompareButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CompareToCombobox.SelectedItem is SaveItem save)
+            if (CompareToCombobox.SelectedItem is ComboboxItemWithDelete save)
             {
                 _abort = false;
                 RunningGrid.Visibility = Visibility.Visible;
                 ControlsPanel.IsEnabled = false;
                 ControlsPanel.Opacity = 0.3;
-                ResultTextBlock.Text = "";
                 var project = await DTE2Helper.GetActiveProjectAsync();
-                var targetBinary = _saveManager.GetBinaryPath(project.Name, save.Name);
+                var targetBinary = _saveManager.GetBinaryPath(project.Name, save.Save.Name);
                 var rounds = Int32.Parse(RoundsTextBox.Text);
                 if (project != null && targetBinary != null)
                 {
                     var currentBinary = Path.Combine(project.FullName, await DTE2Helper.GetOutputDirAsync(), $"{project.Name}.exe");
-                    RunningProgressBar.Maximum = rounds * 2;
+                    RunningProgressBar.Maximum = rounds;
                     RunningProgressBar.Value = 0;
 
-                    var watch = new Stopwatch();
-                    watch.Start();
-                    var exitCurrent = -1;
-                    for (int i = 0; i < rounds && !_abort; i++)
-                    {
-                        exitCurrent = await ExecuteBinaryAsync(currentBinary, ArgumentsTextbox.Text);
-                        RunningProgressBar.Value += 1;
-                    }
-                    watch.Stop();
-                    var timeCurrent = watch.ElapsedMilliseconds;
-
-                    watch = new Stopwatch();
-                    watch.Start();
-                    var exitTarget = -1;
-                    for (int i = 0; i < rounds && !_abort; i++) 
-                    { 
-                        exitTarget = await ExecuteBinaryAsync(targetBinary.FullName, ArgumentsTextbox.Text);
-                        RunningProgressBar.Value += 1;
-                    }
-                    watch.Stop();
-                    var timeTarget = watch.ElapsedMilliseconds;
+                    var results = await _comparisoManager.CompareAsync(currentBinary, targetBinary.FullName, ArgumentsTextbox.Text, rounds);
 
                     if (!_abort)
                     {
-                        ResultTextBlock.Text += $"Current exit code: {exitCurrent}{Environment.NewLine}";
-                        ResultTextBlock.Text += $"Target exit code:  {exitTarget}{Environment.NewLine}";
-                        ResultTextBlock.Text += $"Current Time:      {timeCurrent}ms{Environment.NewLine}";
-                        ResultTextBlock.Text += $"Target Time:       {timeTarget}ms{Environment.NewLine}";
+                        ResultDataGrid.ItemsSource = null;
+                        var list = new ObservableCollection<TableRow>();
+                        list.Add(new TableRow() { Name = "Sum", Value1 = Math.Round(results.Sum(x => x.Value1),1), Value2 = Math.Round(results.Sum(x => x.Value2), 1) });
+                        list.Add(new TableRow() { Name = "Avg", Value1 = Math.Round(results.Average(x => x.Value1), 1), Value2 = Math.Round(results.Average(x => x.Value2), 1) });
+                        list.Add(new TableRow() { Name = "Min", Value1 = Math.Round(results.Min(x => x.Value1), 1), Value2 = Math.Round(results.Min(x => x.Value2), 1) });
+                        list.Add(new TableRow() { Name = "Max", Value1 = Math.Round(results.Max(x => x.Value1), 1), Value2 = Math.Round(results.Max(x => x.Value2), 1) });
+                        ResultDataGrid.ItemsSource = list;
+                        var targetWidth = ResultDataGrid.ActualWidth / 3;
+                        ResultDataGrid.Columns[0].Header = "";
+                        ResultDataGrid.Columns[0].Width = targetWidth;
+                        ResultDataGrid.Columns[1].Header = "Current";
+                        ResultDataGrid.Columns[1].Width = targetWidth;
+                        ResultDataGrid.Columns[2].Header = save.Save.Name;
+                        ResultDataGrid.Columns[2].Width = targetWidth;
+
+                        PlotGrid.Children.Clear();
+                        PlotGrid.Children.Add(new ScatterPlot(results.Select(x => x.Value1).ToList(), "Current", results.Select(x => x.Value2).ToList(), save.Save.Name, PlotGrid.ActualWidth));
                     }
                 }
                 RunningGrid.Visibility = Visibility.Hidden;
                 ControlsPanel.IsEnabled = true;
                 ControlsPanel.Opacity = 1;
             }
-        }
-
-        private async Task<int> ExecuteBinaryAsync(string file, string arguments)
-        {
-            if (_abort)
-                return -1;
-            _currentProcess = new Process()
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = file,
-                    Arguments = arguments,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                }
-            };
-
-            _currentProcess.Start();
-            await _currentProcess.WaitForExitAsync();
-            return _currentProcess.ExitCode;
         }
 
         private async void SaveNewButton_Click(object sender, RoutedEventArgs e)
@@ -142,8 +135,7 @@ namespace QComp
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             _abort = true;
-            if (_currentProcess != null && !_currentProcess.HasExited)
-                _currentProcess?.Kill();
+            _comparisoManager.Abort = true;
         }
     }
 }

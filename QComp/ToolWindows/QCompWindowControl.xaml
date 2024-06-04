@@ -49,7 +49,22 @@
 
             <Button x:Name="CompareButton" Content="Compare!" Margin="2" FontSize="12" Foreground="White" Click="CompareButton_Click"/>
 
-            <TextBlock x:Name="ResultTextBlock" Height="200" Margin="2" Foreground="White"/>
+            <DataGrid x:Name="ResultDataGrid" Height="91" Margin="5" Background="Transparent" Foreground="White" RowBackground="Transparent" IsReadOnly="True" BorderThickness="2" BorderBrush="Gray" AutoGenerateColumns="False" HeadersVisibility="Column" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="Gray">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Path=Name}"/>
+                    <DataGridTextColumn Binding="{Binding Path=Value1}"/>
+                    <DataGridTextColumn Binding="{Binding Path=Value2}"/>
+                </DataGrid.Columns>
+                <DataGrid.Resources>
+                    <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                </DataGrid.Resources>
+            </DataGrid>
+
+            <Grid x:Name="PlotGrid" Margin="5">
+                
+            </Grid>
         </StackPanel>
         <Grid x:Name="RunningGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden">
             <StackPanel>
