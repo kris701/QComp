@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="QComp.QCompWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+             xmlns:theming="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Imaging"
+             xmlns:util="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Utilities"
+             xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+             xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+             toolkit:Themes.UseVsTheme="True"
+             mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="400"
+             d:Background="Gray"
+             Name="QComp"
+             Loaded="UserControl_Loaded">
+    <Grid>
+        <StackPanel x:Name="ControlsPanel">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Save current binary as" FontSize="12" Foreground="White" VerticalAlignment="Center"/>
+                <TextBox x:Name="SaveNewNameTextbox" Grid.Column="1" Margin="2" FontSize="12" Foreground="White"/>
+                <Button x:Name="SaveNewButton" Grid.Column="2" Margin="2" Content="💾" HorizontalAlignment="Center" FontSize="12" Foreground="White" Click="SaveNewButton_Click"/>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Compare current binary to" FontSize="12" Foreground="White" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CompareToCombobox" Grid.Column="1" Margin="2" FontSize="12" Foreground="White"/>
+            </Grid>
+
+            <Expander Header="Arguments" Foreground="White">
+                <StackPanel>
+                    <Label>Rounds</Label>
+                    <TextBox x:Name="RoundsTextBox" Text="1" Margin="5" FontSize="12" Foreground="White" PreviewTextInput="RoundsTextBox_PreviewTextInput"/>
+                    <Label>Launch Arguments</Label>
+                    <TextBox x:Name="ArgumentsTextbox" Height="100" Margin="5"/>
+                </StackPanel>
+            </Expander>
+
+            <Button x:Name="CompareButton" Content="Compare!" Margin="2" FontSize="12" Foreground="White" Click="CompareButton_Click"/>
+
+            <TextBlock x:Name="ResultTextBlock" Height="200" Margin="2" Foreground="White"/>
+        </StackPanel>
+        <Grid x:Name="RunningGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden">
+            <StackPanel>
+                <Label FontSize="20" Foreground="White">Running...</Label>
+                <ProgressBar x:Name="RunningProgressBar" Height="5"/>
+                <Button x:Name="CancelButton" Content="Cancel" Margin="5" Click="CancelButton_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
