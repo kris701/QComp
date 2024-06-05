@@ -1,12 +1,5 @@
 ﻿using EnvDTE;
-using Microsoft.VisualStudio.Shell;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace QComp.Helpers
@@ -33,7 +26,7 @@ namespace QComp.Helpers
             var _projects = _dte.Solution.Projects;
             if (_projects != null && _projects.Count != 0)
             {
-                foreach(EnvDTE.Project project in _projects)
+                foreach (EnvDTE.Project project in _projects)
                     if (project.FullName.EndsWith(name))
                         return project;
             }

@@ -1,12 +1,8 @@
 ﻿using Microsoft.VisualStudio.Threading;
 using QComp.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace QComp
 {
@@ -17,13 +13,15 @@ namespace QComp
 
         public int Round { get; set; } = 0;
         private bool _abort = false;
-        public bool Abort { 
-            get => _abort; 
-            set { 
-                _abort = value; 
+        public bool Abort
+        {
+            get => _abort;
+            set
+            {
+                _abort = value;
                 if (_currentProcess != null && !_currentProcess.HasExited)
                     _currentProcess?.Kill();
-            } 
+            }
         }
 
         private Process? _currentProcess;
@@ -39,7 +37,7 @@ namespace QComp
             var result = new List<ComparisonResult>();
 
             var watch = new Stopwatch();
-            for(int i = 0; i < rounds && !Abort; i++)
+            for (int i = 0; i < rounds && !Abort; i++)
             {
                 var subResult = new ComparisonResult();
                 subResult.Round = i;

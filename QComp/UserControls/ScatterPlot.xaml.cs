@@ -1,24 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace QComp.UserControls
 {
     public partial class ScatterPlot : UserControl
     {
-        private List<double> _horizontal;
-        private List<double> _vertical;
+        private readonly List<double> _horizontal;
+        private readonly List<double> _vertical;
 
         public ScatterPlot(List<double> horizontal, string horizontalName, List<double> vertical, string verticalName, double size)
         {
@@ -82,7 +74,7 @@ namespace QComp.UserControls
         {
             MainCanvas.Children.Add(new Label()
             {
-                Content = Math.Round(value,0),
+                Content = Math.Round(value, 0),
                 Margin = new Thickness(value * scale, MainCanvas.ActualHeight - 20, 0, 0)
             });
 

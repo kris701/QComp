@@ -1,12 +1,9 @@
 ﻿using QComp.Helpers;
 using QComp.Models;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace QComp
 {
@@ -19,7 +16,7 @@ namespace QComp
         private string _qCompSaveDir;
         private string _indexFileName;
 
-        public SavesManager() 
+        public SavesManager()
         {
             _index = new SavesIndex(new Dictionary<string, List<SaveItem>>());
         }

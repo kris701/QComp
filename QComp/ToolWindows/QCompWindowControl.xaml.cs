@@ -7,17 +7,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Markup;
 
 namespace QComp
 {
     public partial class QCompWindowControl : UserControl
     {
-        private SavesManager _saveManager;
-        private ComparisonManager _comparisoManager;
+        private readonly SavesManager _saveManager;
+        private readonly ComparisonManager _comparisoManager;
         private bool _abort = false;
 
         public QCompWindowControl()
@@ -39,7 +37,7 @@ namespace QComp
             CompareToCombobox.Items.Clear();
             var project = await DTE2Helper.GetActiveProjectAsync();
             if (project != null)
-                foreach(var save in _saveManager.GetSavesForProject(project.Name))
+                foreach (var save in _saveManager.GetSavesForProject(project.Name))
                     CompareToCombobox.Items.Add(save);
         }
 
@@ -66,7 +64,7 @@ namespace QComp
                     {
                         ResultDataGrid.ItemsSource = null;
                         var list = new ObservableCollection<TableRow>();
-                        list.Add(new TableRow() { Name = "Sum", Value1 = Math.Round(results.Sum(x => x.Value1),1), Value2 = Math.Round(results.Sum(x => x.Value2), 1) });
+                        list.Add(new TableRow() { Name = "Sum", Value1 = Math.Round(results.Sum(x => x.Value1), 1), Value2 = Math.Round(results.Sum(x => x.Value2), 1) });
                         list.Add(new TableRow() { Name = "Avg", Value1 = Math.Round(results.Average(x => x.Value1), 1), Value2 = Math.Round(results.Average(x => x.Value2), 1) });
                         list.Add(new TableRow() { Name = "Min", Value1 = Math.Round(results.Min(x => x.Value1), 1), Value2 = Math.Round(results.Min(x => x.Value2), 1) });
                         list.Add(new TableRow() { Name = "Max", Value1 = Math.Round(results.Max(x => x.Value1), 1), Value2 = Math.Round(results.Max(x => x.Value2), 1) });
