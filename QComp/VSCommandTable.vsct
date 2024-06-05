@@ -9,21 +9,28 @@
   <Commands package="QComp">
     <!--This section defines the elements the user can interact with, like a menu command or a button or combo box in a toolbar. -->
     <Buttons>
-      <Button guid="QComp" id="MyCommand" priority="0x0100" type="Button">
+      <Button guid="QComp" id="OpenQCompCommand" priority="0x0100" type="Button">
         <Parent guid="VSMainMenu" id="View.DevWindowsGroup.OtherWindows.Group1"/>
-        <Icon guid="ImageCatalogGuid" id="ToolWindow" />
-        <CommandFlag>IconIsMoniker</CommandFlag>
+		<Icon guid="IconGuid" id="bmpPic1" />
         <Strings>
           <ButtonText>QComp</ButtonText>
+			<ToolTipText>Open the main QComp tool window.</ToolTipText>
           <LocCanonicalName>.View.QCompWindow</LocCanonicalName>
         </Strings>
       </Button>
     </Buttons>
+
+	  <Bitmaps>
+		  <Bitmap guid="IconGuid" href="Resources\IconSmall.png" />
+	  </Bitmaps>
   </Commands>
 
   <Symbols>
     <GuidSymbol name="QComp" value="{b3de54c2-1e30-409b-87ac-a2937f674bee}">
-      <IDSymbol name="MyCommand" value="0x0100" />
+      <IDSymbol name="OpenQCompCommand" value="0x0100" />
     </GuidSymbol>
+	  <GuidSymbol value="{68eef789-6804-4c92-9254-cdf2f88b54ad}" name="IconGuid">
+		  <IDSymbol name="bmpPic1" value="1" />
+	  </GuidSymbol>
   </Symbols>
 </CommandTable>

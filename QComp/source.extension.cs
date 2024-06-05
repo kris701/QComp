@@ -9,7 +9,7 @@ namespace QComp
     {
         public const string Id = "QComp.514991ad-b22d-40f5-a412-6e510cd6d2d9";
         public const string Name = "QComp";
-        public const string Description = @"Empty VSIX Project.";
+        public const string Description = @"A simple tool to quickly compare the performance differences of current and previous binaries.";
         public const string Language = "en-US";
         public const string Version = "0.1";
         public const string Author = "Kristian Skov Johansen";

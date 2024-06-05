@@ -1,6 +1,6 @@
 ﻿namespace QComp
 {
-    [Command(PackageIds.MyCommand)]
+    [Command(PackageIds.OpenQCompCommand)]
     internal sealed class QCompWindowCommand : BaseCommand<QCompWindowCommand>
     {
         protected override Task ExecuteAsync(OleMenuCmdEventArgs e)

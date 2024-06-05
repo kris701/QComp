@@ -14,12 +14,16 @@ namespace QComp
     {
         public const string QCompString = "b3de54c2-1e30-409b-87ac-a2937f674bee";
         public static Guid QComp = new Guid(QCompString);
+
+        public const string IconGuidString = "68eef789-6804-4c92-9254-cdf2f88b54ad";
+        public static Guid IconGuid = new Guid(IconGuidString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
     /// </summary>
     internal sealed partial class PackageIds
     {
-        public const int MyCommand = 0x0100;
+        public const int OpenQCompCommand = 0x0100;
+        public const int bmpPic1 = 0x0001;
     }
 }

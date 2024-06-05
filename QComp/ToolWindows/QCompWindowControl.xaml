@@ -110,17 +110,13 @@
             <Grid Grid.Row="3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="40"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="HelpButton" Content="?" Margin="5" HorizontalAlignment="Center" Click="HelpButton_Click">
-                    <Button.ToolTip>Open the help page.</Button.ToolTip>
-                </Button>
-                <Button x:Name="GitButton" Grid.Column="1" Content="Git" Margin="5" HorizontalAlignment="Center" Click="GitButton_Click">
+                <Button x:Name="GitButton" Content="Git" Margin="5" HorizontalAlignment="Center" Click="GitButton_Click">
                     <Button.ToolTip>Open the projects GitHub Repository page.</Button.ToolTip>
                 </Button>
-                <Label Grid.Column="2" Content="QComp 2024" VerticalAlignment="Center"/>
+                <Label Grid.Column="1" Content="QComp 2024" VerticalAlignment="Center"/>
             </Grid>
         </Grid>
 
