@@ -11,7 +11,7 @@ namespace QComp
         public const string Name = "QComp";
         public const string Description = @"A simple tool to quickly compare the performance differences of current and previous binaries.";
         public const string Language = "en-US";
-        public const string Version = "0.1";
+        public const string Version = "0.1.1";
         public const string Author = "Kristian Skov Johansen";
         public const string Tags = "";
     }

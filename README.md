@@ -2,11 +2,11 @@
     <img src="https://github.com/kris701/QComp/assets/22596587/84c22fdc-7da6-438d-8339-576ae7309748" width="200" height="200" />
 </p>
 
-# QComp
+# Quick Compare - QComp
 QComp is a Visual Studio Extension that allows you to quickly compare performance differnces between current and older versions of your project.
 
 ## How to use?
-Firstly, install the extension by finding it on the Visual Studio Markedplace.
+Firstly, install the extension by finding it on the [Visual Studio Markedplace](https://marketplace.visualstudio.com/items?itemName=KristianSkovJohansen.qcomp).
 When you have installed it, you should be able to see a new tool window under View in Visual Studio:
 
 ![image](https://github.com/kris701/QComp/assets/22596587/69388321-9316-4ae6-9f06-9271cfe906c1)

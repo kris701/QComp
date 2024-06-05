@@ -3,6 +3,7 @@ using QComp.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 
 namespace QComp
@@ -18,7 +19,7 @@ namespace QComp
 
         public SavesManager()
         {
-            _index = new SavesIndex(new Dictionary<string, List<SaveItem>>());
+            _index = new SavesIndex(new Dictionary<string, List<SaveItem>>(), new Dictionary<string, List<string>>());
         }
 
         public async Task InitializeAsync()
@@ -34,13 +35,13 @@ namespace QComp
                     _index = JsonSerializer.Deserialize<SavesIndex>(File.ReadAllText(_indexFileName));
                 else
                 {
-                    _index = new SavesIndex(new Dictionary<string, List<SaveItem>>());
+                    _index = new SavesIndex(new Dictionary<string, List<SaveItem>>(), new Dictionary<string, List<string>>());
                     File.WriteAllText(_indexFileName, JsonSerializer.Serialize(_index));
                 }
             }
         }
 
-        public void Save(string sourceContent, string project, string name)
+        public void SaveBinary(string sourceContent, string project, string name)
         {
             if (!_index.Items.ContainsKey(project))
                 _index.Items.Add(project, new List<SaveItem>());
@@ -54,7 +55,7 @@ namespace QComp
             File.WriteAllText(_indexFileName, JsonSerializer.Serialize(_index));
         }
 
-        public void Delete(string project, string name)
+        public void DeleteBinary(string project, string name)
         {
             if (!_index.Items.ContainsKey(project))
                 _index.Items.Add(project, new List<SaveItem>());
@@ -66,12 +67,12 @@ namespace QComp
             File.WriteAllText(_indexFileName, JsonSerializer.Serialize(_index));
         }
 
-        public void DeleteAll(string project)
+        public void DeleteAllBinaries(string project)
         {
             if (!_index.Items.ContainsKey(project))
                 _index.Items.Add(project, new List<SaveItem>());
             foreach (var save in _index.Items[project])
-                Delete(project, save.Name);
+                DeleteBinary(project, save.Name);
         }
 
         public List<SaveItem> GetSavesForProject(string project)
@@ -89,6 +90,29 @@ namespace QComp
                 return null;
             var item = _index.Items[project].First(x => x.Name == name);
             return new DirectoryInfo(Path.Combine(_qCompSaveDir, project, item.Name, item.Binary));
+        }
+
+        public void SaveArguments(string project, string arguments)
+        {
+            if (!_index.CachedArguments.ContainsKey(project))
+                _index.CachedArguments.Add(project, new List<string>());
+            _index.CachedArguments[project].Add(arguments);
+            File.WriteAllText(_indexFileName, JsonSerializer.Serialize(_index));
+        }
+
+        public void DeleteArguments(string project, string arguments)
+        {
+            if (!_index.CachedArguments.ContainsKey(project))
+                _index.CachedArguments.Add(project, new List<string>());
+            _index.CachedArguments[project].Remove(arguments);
+            File.WriteAllText(_indexFileName, JsonSerializer.Serialize(_index));
+        }
+
+        public List<string> GetArgumentsForProject(string project)
+        {
+            if (!_index.CachedArguments.ContainsKey(project))
+                _index.CachedArguments.Add(project, new List<string>());
+            return _index.CachedArguments[project];
         }
     }
 }

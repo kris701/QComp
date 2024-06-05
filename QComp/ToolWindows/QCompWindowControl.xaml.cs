@@ -35,10 +35,15 @@ namespace QComp
         private async Task RefreshComboboxAsync()
         {
             CompareToCombobox.Items.Clear();
+            PreviousArgumentsCombobox.Items.Clear();
             var project = await DTE2Helper.GetActiveProjectAsync();
             if (project != null)
+            {
                 foreach (var save in _saveManager.GetSavesForProject(project.Name))
                     CompareToCombobox.Items.Add(save);
+                foreach (var arg in _saveManager.GetArgumentsForProject(project.Name))
+                    PreviousArgumentsCombobox.Items.Add(arg);
+            }
         }
 
         private async void CompareButton_Click(object sender, RoutedEventArgs e)
@@ -95,7 +100,7 @@ namespace QComp
                 if (project != null)
                 {
                     var sourceContent = Path.Combine(project.FullName, await DTE2Helper.GetOutputDirAsync());
-                    _saveManager.Save(sourceContent, project.Name, SaveNewNameTextbox.Text);
+                    _saveManager.SaveBinary(sourceContent, project.Name, SaveNewNameTextbox.Text);
                 }
                 SaveNewNameTextbox.Text = "";
             }
@@ -136,17 +141,46 @@ namespace QComp
         private async void RemoveBinaryButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is SaveItem save)
-                await DeleteItemAsync(save);
+                await DeleteSaveItemAsync(save);
         }
 
-        private async Task DeleteItemAsync(SaveItem save)
+        private async Task DeleteSaveItemAsync(SaveItem save)
         {
             var project = await DTE2Helper.GetActiveProjectAsync();
             if (project != null)
             {
-                _saveManager.Delete(project.Name, save.Name);
+                _saveManager.DeleteBinary(project.Name, save.Name);
                 CompareToCombobox.Items.Remove(save);
             }
+        }
+
+        private async void RemoveArgumentButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string arg)
+                await DeleteArgumentItemAsync(arg);
+        }
+
+        private async Task DeleteArgumentItemAsync(string arg)
+        {
+            var project = await DTE2Helper.GetActiveProjectAsync();
+            if (project != null)
+            {
+                _saveManager.DeleteArguments(project.Name, arg);
+                PreviousArgumentsCombobox.Items.Remove(arg);
+            }
+        }
+
+        private async void SaveArgumentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var project = await DTE2Helper.GetActiveProjectAsync();
+            if (project != null)
+                _saveManager.SaveArguments(project.Name, ArgumentsTextbox.Text);
+            await RefreshComboboxAsync();
+        }
+
+        private void PreviousArgumentsCombobox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            ArgumentsTextbox.Text = PreviousArgumentsCombobox.SelectedItem as string;
         }
     }
 }

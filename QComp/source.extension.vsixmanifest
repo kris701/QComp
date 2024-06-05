@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="QComp.514991ad-b22d-40f5-a412-6e510cd6d2d9" Version="0.1" Language="en-US" Publisher="Kristian Skov Johansen" />
+        <Identity Id="QComp.514991ad-b22d-40f5-a412-6e510cd6d2d9" Version="0.1.1" Language="en-US" Publisher="Kristian Skov Johansen" />
         <DisplayName>QComp</DisplayName>
         <Description xml:space="preserve">A simple tool to quickly compare the performance differences of current and previous binaries.</Description>
         <MoreInfo>https://github.com/kris701/QComp</MoreInfo>
