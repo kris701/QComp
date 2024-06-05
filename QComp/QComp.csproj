@@ -61,9 +61,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\ComboboxItemWithDelete.xaml.cs">
-      <DependentUpon>ComboboxItemWithDelete.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UserControls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
@@ -100,10 +97,6 @@
     <Compile Include="ToolWindows\QCompWindowControl.xaml.cs">
       <DependentUpon>QCompWindowControl.xaml</DependentUpon>
     </Compile>
-    <Page Include="UserControls\ComboboxItemWithDelete.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="UserControls\ScatterPlot.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

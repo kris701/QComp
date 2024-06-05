@@ -34,42 +34,25 @@ namespace QComp
             await RefreshComboboxAsync();
         }
 
-        private async Task DeleteItemAsync(SaveItem save)
-        {
-            var project = await DTE2Helper.GetActiveProjectAsync();
-            if (project != null)
-            {
-                _saveManager.Delete(project.Name, save.Name);
-                foreach (var item in CompareToCombobox.Items) 
-                {
-                    if (item is ComboboxItemWithDelete actItem && actItem.Save == save)
-                    {
-                        CompareToCombobox.Items.Remove(item);
-                        break;
-                    }
-                }        
-            }
-        }
-
         private async Task RefreshComboboxAsync()
         {
             CompareToCombobox.Items.Clear();
             var project = await DTE2Helper.GetActiveProjectAsync();
             if (project != null)
                 foreach(var save in _saveManager.GetSavesForProject(project.Name))
-                    CompareToCombobox.Items.Add(new ComboboxItemWithDelete(save, DeleteItemAsync));
+                    CompareToCombobox.Items.Add(save);
         }
 
         private async void CompareButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CompareToCombobox.SelectedItem is ComboboxItemWithDelete save)
+            if (CompareToCombobox.SelectedItem is SaveItem save)
             {
                 _abort = false;
                 RunningGrid.Visibility = Visibility.Visible;
                 ControlsPanel.IsEnabled = false;
                 ControlsPanel.Opacity = 0.3;
                 var project = await DTE2Helper.GetActiveProjectAsync();
-                var targetBinary = _saveManager.GetBinaryPath(project.Name, save.Save.Name);
+                var targetBinary = _saveManager.GetBinaryPath(project.Name, save.Name);
                 var rounds = Int32.Parse(RoundsTextBox.Text);
                 if (project != null && targetBinary != null)
                 {
@@ -93,11 +76,11 @@ namespace QComp
                         ResultDataGrid.Columns[0].Width = targetWidth;
                         ResultDataGrid.Columns[1].Header = "Current";
                         ResultDataGrid.Columns[1].Width = targetWidth;
-                        ResultDataGrid.Columns[2].Header = save.Save.Name;
+                        ResultDataGrid.Columns[2].Header = save.Name;
                         ResultDataGrid.Columns[2].Width = targetWidth;
 
                         PlotGrid.Children.Clear();
-                        PlotGrid.Children.Add(new ScatterPlot(results.Select(x => x.Value1).ToList(), "Current", results.Select(x => x.Value2).ToList(), save.Save.Name, PlotGrid.ActualWidth));
+                        PlotGrid.Children.Add(new ScatterPlot(results.Select(x => x.Value1).ToList(), "Current", results.Select(x => x.Value2).ToList(), save.Name, PlotGrid.ActualWidth));
                     }
                 }
                 RunningGrid.Visibility = Visibility.Hidden;
@@ -136,6 +119,36 @@ namespace QComp
         {
             _abort = true;
             _comparisoManager.Abort = true;
+        }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://github.com/kris701/QComp",
+                UseShellExecute = true
+            });
+        }
+
+        private async void RemoveBinaryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is SaveItem save)
+                await DeleteItemAsync(save);
+        }
+
+        private async Task DeleteItemAsync(SaveItem save)
+        {
+            var project = await DTE2Helper.GetActiveProjectAsync();
+            if (project != null)
+            {
+                _saveManager.Delete(project.Name, save.Name);
+                CompareToCombobox.Items.Remove(save);
+            }
         }
     }
 }
